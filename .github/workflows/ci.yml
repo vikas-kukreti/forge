@@ -28,3 +28,6 @@ jobs:
 
     - name: Run E2E Tests (M0)
       run: make e2e-m0
+
+    - name: Run E2E Tests (M1)
+      run: make e2e-m1
