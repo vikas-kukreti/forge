@@ -21,6 +21,10 @@ type Config struct {
 	TLS                     string
 	MetricsAddr             string
 	Runtime                 string
+	SignupGrantCredits      int64
+	MaxProjectsPerUser      int
+	AdminEmails             string
+	Signups                 string
 }
 
 func LoadConfig() *Config {
@@ -34,10 +38,14 @@ func LoadConfig() *Config {
 		S3SecretKey:     requireEnv("FORGE_S3_SECRET_KEY"),
 		S3Region:        requireEnv("FORGE_S3_REGION"),
 		InternalToken:   requireEnv("FORGE_INTERNAL_TOKEN"),
-		CookieSecret:    requireEnv("FORGE_COOKIE_SECRET"),
-		TLS:             getEnvOrDefault("FORGE_TLS", "on"),
-		MetricsAddr:     getEnvOrDefault("FORGE_METRICS_ADDR", "localhost:9090"),
-		Runtime:         getEnvOrDefault("FORGE_RUNTIME", "runsc"),
+		CookieSecret:       requireEnv("FORGE_COOKIE_SECRET"),
+		TLS:                getEnvOrDefault("FORGE_TLS", "on"),
+		MetricsAddr:        getEnvOrDefault("FORGE_METRICS_ADDR", "localhost:9090"),
+		Runtime:            getEnvOrDefault("FORGE_RUNTIME", "runsc"),
+		SignupGrantCredits: getEnvOrDefaultInt64("FORGE_SIGNUP_GRANT_CREDITS", 50),
+		MaxProjectsPerUser: getEnvOrDefaultInt("FORGE_MAX_PROJECTS_PER_USER", 10),
+		AdminEmails:        getEnvOrDefault("FORGE_ADMIN_EMAILS", ""),
+		Signups:            getEnvOrDefault("FORGE_SIGNUPS", "open"),
 	}
 
 	fakeLlm := os.Getenv("FORGE_FAKE_LLM")
@@ -57,6 +65,32 @@ func requireEnv(key string) string {
 		os.Exit(1)
 	}
 	return val
+}
+
+func getEnvOrDefaultInt(key string, def int) int {
+	val := os.Getenv(key)
+	if val == "" {
+		return def
+	}
+	var i int
+	_, err := fmt.Sscanf(val, "%d", &i)
+	if err != nil {
+		return def
+	}
+	return i
+}
+
+func getEnvOrDefaultInt64(key string, def int64) int64 {
+	val := os.Getenv(key)
+	if val == "" {
+		return def
+	}
+	var i int64
+	_, err := fmt.Sscanf(val, "%d", &i)
+	if err != nil {
+		return def
+	}
+	return i
 }
 
 func getEnvOrDefault(key, def string) string {
