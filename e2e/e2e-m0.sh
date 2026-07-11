@@ -78,7 +78,7 @@ kill $GATEWAY_PID $LLMPROXY_PID || true
 wait || true
 
 # Test fail-fast config missing
-if ! DOMAIN="" bin/forged-amd64 2>&1 | grep -q "missing required config variable DOMAIN"; then
+if ! { DOMAIN="" bin/forged-amd64 2>&1 || true; } | grep -q "missing required config variable DOMAIN"; then
     echo "FAIL: forged did not fail-fast on missing config"
     exit 1
 fi
