@@ -1,4 +1,4 @@
-.PHONY: build lint test dev-up dev-down dev templates seed e2e-m0 e2e-m1 e2e-m2
+.PHONY: build lint test dev-up dev-down dev templates seed e2e
 
 build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/forged-amd64 ./cmd/forged
@@ -36,11 +36,5 @@ seed:
 	# Stub for seed
 	echo "seed"
 
-e2e-m0:
-	bash e2e/e2e-m0.sh
-
-e2e-m1:
-	bash e2e/e2e-m1.sh
-
-e2e-m2:
-	bash e2e/e2e-m2.sh
+e2e:
+	bash e2e/e2e-test.sh
