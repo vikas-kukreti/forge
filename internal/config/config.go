@@ -25,6 +25,11 @@ type Config struct {
 	MaxProjectsPerUser      int
 	AdminEmails             string
 	Signups                 string
+	NodeName                string
+	NodeInternalAddr        string
+	WSRoot                  string
+	SbxSubnet               string
+	SbxBridge               string
 }
 
 func LoadConfig() *Config {
@@ -46,6 +51,11 @@ func LoadConfig() *Config {
 		MaxProjectsPerUser: getEnvOrDefaultInt("FORGE_MAX_PROJECTS_PER_USER", 10),
 		AdminEmails:        getEnvOrDefault("FORGE_ADMIN_EMAILS", ""),
 		Signups:            getEnvOrDefault("FORGE_SIGNUPS", "open"),
+		NodeName:           getEnvOrDefault("FORGE_NODE_NAME", "worker-1"),
+		NodeInternalAddr:   getEnvOrDefault("FORGE_NODE_INTERNAL_ADDR", "localhost:7443"),
+		WSRoot:             getEnvOrDefault("WS_ROOT", "/var/lib/forge/workspaces"),
+		SbxSubnet:          getEnvOrDefault("FORGE_SBX_SUBNET", "10.66.0.0/16"),
+		SbxBridge:          getEnvOrDefault("FORGE_SBX_BRIDGE", "forge-sbx"),
 	}
 
 	fakeLlm := os.Getenv("FORGE_FAKE_LLM")

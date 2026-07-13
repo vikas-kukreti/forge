@@ -1,4 +1,4 @@
-.PHONY: build lint test dev-up dev-down dev templates seed e2e-m0 e2e-m1
+.PHONY: build lint test dev-up dev-down dev templates seed e2e-m0 e2e-m1 e2e-m2
 
 build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/forged-amd64 ./cmd/forged
@@ -19,10 +19,10 @@ test:
 	go test ./...
 
 dev-up:
-	docker compose -f deploy/dev/docker-compose.yml up -d
+	sudo docker compose -f deploy/dev/docker-compose.yml up -d
 
 dev-down:
-	docker compose -f deploy/dev/docker-compose.yml down -v
+	sudo docker compose -f deploy/dev/docker-compose.yml down -v
 
 dev:
 	# Stub for dev
@@ -41,3 +41,6 @@ e2e-m0:
 
 e2e-m1:
 	bash e2e/e2e-m1.sh
+
+e2e-m2:
+	bash e2e/e2e-m2.sh
