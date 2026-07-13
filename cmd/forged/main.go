@@ -11,10 +11,13 @@ import (
 	"forge/internal/config"
 	"forge/internal/credits"
 	"forge/internal/db"
+	"forge/internal/events"
 	"forge/internal/logger"
+	"forge/internal/scheduler"
 	"forge/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/nats-io/nats.go"
 	"log/slog"
 )
 
@@ -42,6 +45,21 @@ func main() {
 	ledgerStore := store.NewLedgerStore(pool)
 	credMgr := credits.NewManager(pool)
 
+	nc, err := nats.Connect(cfg.NatsURL)
+	if err != nil {
+		slog.Error("failed to connect to nats", "error", err)
+		os.Exit(1)
+	}
+	defer nc.Close()
+
+	// Scheduler
+	schedulerMgr := scheduler.NewScheduler(pool, nc)
+	schedulerMgr.Start(ctx)
+
+	// EventBus
+	eventBus := events.NewEventBus(pool, nc)
+	eventBus.Start(ctx)
+
 	// Rate limiters
 	rateLimiters := map[string]func(http.Handler) http.Handler{
 		"signup": api.NewRateLimiter(5, time.Hour).Middleware(api.ExtractIP),
@@ -51,7 +69,7 @@ func main() {
 
 	// Handlers
 	authHandler := api.NewAuthHandler(userStore, sessionStore, ledgerStore, credMgr, cfg)
-	projectsHandler := api.NewProjectsHandler(projectStore, userStore, cfg)
+	projectsHandler := api.NewProjectsHandler(projectStore, userStore, cfg, eventBus)
 	adminHandler := api.NewAdminHandler(userStore, credMgr)
 
 	// Main Router

@@ -31,3 +31,6 @@ jobs:
 
     - name: Run E2E Tests (M1)
       run: make e2e-m1
+
+    - name: Run E2E Tests (M2)
+      run: make e2e-m2
