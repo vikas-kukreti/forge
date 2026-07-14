@@ -122,14 +122,14 @@ echo "Testing signup..."
 SIGNUP_RES=$(curl -s -X POST http://localhost:8080/v1/auth/signup -c cookie.txt \
     -H "Content-Type: application/json" \
     -d '{"email":"user1@example.com", "password":"password123"}')
-if ! echo " SIGNUP_RES" | grep -q "user1@example.com"; then
+if ! echo "$SIGNUP_RES" | grep -q "user1@example.com"; then
     echo "FAIL: Signup failed: $SIGNUP_RES"
     exit 1
 fi
 echo "PASS: signup successful"
 
 # Ensure 50 credits (50000000 microcredits)
-if ! echo "$SIGNUP_RES" | grep -q ('"balance_microcredits":50000000'); then
+if ! echo "$SIGNUP_RES" | grep -q '"balance_microcredits":50000000'; then
     echo "FAIL: Signup grant incorrect"
     exit 1
 fi
@@ -155,7 +155,7 @@ CREATE_RES=$(curl -s -X POST http://localhost:8080/v1/projects -b cookie.txt \
     -H "X-Forge-CSRF: 1" \
     -H "Content-Type: application/json" \
     -d '{"name":"test", "template":"static"}')
-PROJ_ID=$(echo "$CREATE_RES" | grep -o '"id":"[^*" | cut -d'"' -f4 | head -1)
+PROJ_ID=$(echo "$CREATE_RES" | grep -o '"id":"[^"]*"' | cut -d'"' -f4 | head -1)
 echo "PASS: project created"
 
 echo "Testing 21st project limit..."
@@ -179,7 +179,7 @@ echo "Testing admin features..."
 curl -s -X POST http://localhost:8080/v1/auth/signup -c cookie_admin.txt \
     -H "Content-Type: application/json" \
     -d '{"email":"admin@example.com", "password":"password123"}' >/dev/null
-USER_A_ID=$(echo "$SIGNUP_RES" | grep -o '"id":"[^*" | cut -d'"' -f4 | head -1)
+USER_A_ID=$(echo "$SIGNUP_RES" | grep -o '"id":"[^"]*"' | cut -d'"' -f4 | head -1)
 
 # Admin grants credits
 curl -s -X POST http://localhost:8080/v1/admin/users/$USER_A_ID/grant -b cookie_admin.txt \
@@ -198,7 +198,7 @@ echo "PASS: admin grant reflected in balance"
 curl -s -X POST http://localhost:8080/v1/admin/users/$USER_A_ID/suspend -b cookie_admin.txt \
     -H "X-Forge-CSRF: 1" >/dev/null
 
-3 Try login as suspended user
+# 3 Try login as suspended user
 LOGIN_RES=$(curl -s -X POST http://localhost:8080/v1/auth/login \
     -H "Content-Type: application/json" \
     -d '{"email":"user1@example.com", "password":"password123"}')
@@ -280,7 +280,7 @@ CREATE_RES=$(curl -s -X POST http://localhost:8080/v1/projects -b cookie.txt \
     -H "X-Forge-CSRF: 1" \
     -H "Content-Type: application/json" \
     -d '{"name":"m2test", "template":"static"}')
-PROJ_ID=$(echo "$CREATE_RES" | grep -o '"id":"['^*" | cut -d'"' -f4 | head -1)
+PROJ_ID=$(echo "$CREATE_RES" | grep -o '"id":"[^"]*"' | cut -d'"' -f4 | head -1)
 echo "PASS: project created: $PROJ_ID"
 
 echo "Testing WS streams..."
@@ -327,4 +327,6 @@ wait $WS_PID
 echo "PASS: WS SMOKE streams monotonic seq and task.done"
 
 # Teardown
-kill $FORGED_PID $NODED_PID || true; \xb5\xb9\x85\xb1\xb0\x81\x99\xbdɝ\x95\x90\xb5\x85\xb5\x90\xd8Ё\x99\xbdɝ\x94\xb5\xb9\xbd\x91\x95\x90\xb5\x85\xb5\x90\xd8Ё\xf1\xf0\x81\xd1\xc9Ք)\x95\x8d\xa1\xbc\x80\x89\xb1\xb0\x814ȁ\x8d\xa1\x95\x8d\xad́\xc1\x85\xcd͕\x90\xb8\x88()\x95\x8d\xa1\xbc\x80\x89\xb1\xb0\x81\xc9\x81\x8d\xa1\x95\x8d\xad́\xc1\x85\xcd͕\x90\x84\x88(
+kill $FORGED_PID $NODED_PID || true; killall forged-amd64 forge-noded-amd64 || true
+echo "All M2 checks passed."
+echo "All e2e checks passed!"
