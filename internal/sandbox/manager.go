@@ -166,10 +166,6 @@ func (m *Manager) DestroyProject(ctx context.Context, projectID string) error {
 }
 
 func (m *Manager) streamEvents(projectID, sockPath string, runtime string) {
-	if runtime == "local" {
-		sockPath = "/run/forge/ctl.sock"
-	}
-
 	// Simple retry loop to connect to socket
 	client := http.Client{
 		Transport: &http.Transport{
@@ -245,9 +241,6 @@ func (m *Manager) HandleRPC(ctx context.Context) {
 			prompt := req["prompt"].(string)
 
 			sockPath := filepath.Join(m.config.WSRoot, projectID, "ctl", "ctl.sock")
-			if m.config.Runtime == "local" {
-				sockPath = "/run/forge/ctl.sock"
-			}
 			client := http.Client{
 				Transport: &http.Transport{
 					DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
