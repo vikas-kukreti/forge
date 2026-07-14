@@ -128,13 +128,13 @@ func (m *Manager) StartProject(ctx context.Context, req StartRequest) error {
 		cmd.Stdout = logFile
 		cmd.Stderr = logFile
 
+		os.MkdirAll(ctlDir, 0777)
+		os.Chmod(ctlDir, 0777)
+
 		err := cmd.Start()
 		if err != nil {
 			return fmt.Errorf("failed to start local shim: %w", err)
 		}
-
-		os.MkdirAll(ctlDir, 0777)
-		os.Chmod(ctlDir, 0777)
 	} else {
 		slog.Info("running docker command", "args", strings.Join(args, " "))
 		cmd = exec.CommandContext(ctx, "docker", args...)
