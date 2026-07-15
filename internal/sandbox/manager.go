@@ -120,7 +120,8 @@ func (m *Manager) StartProject(ctx context.Context, req StartRequest) error {
 		if m.config.FakeLLM {
 			shimArgs = append(shimArgs, "--fake-agent")
 		}
-		cmd = exec.CommandContext(ctx, "bin/forge-shim-amd64", shimArgs...)
+		shimPath, _ := filepath.Abs("bin/forge-shim-amd64")
+		cmd = exec.CommandContext(ctx, shimPath, shimArgs...)
 		cmd.Env = append(os.Environ(), "FORGE_PROJECT_ID="+req.ProjectID)
 		cmd.Dir = workDir
 
@@ -128,13 +129,13 @@ func (m *Manager) StartProject(ctx context.Context, req StartRequest) error {
 		cmd.Stdout = logFile
 		cmd.Stderr = logFile
 
+		os.MkdirAll(ctlDir, 0777)
+		os.Chmod(ctlDir, 0777)
+
 		err := cmd.Start()
 		if err != nil {
 			return fmt.Errorf("failed to start local shim: %w", err)
 		}
-
-		os.MkdirAll(ctlDir, 0777)
-		os.Chmod(ctlDir, 0777)
 	} else {
 		slog.Info("running docker command", "args", strings.Join(args, " "))
 		cmd = exec.CommandContext(ctx, "docker", args...)
@@ -166,10 +167,6 @@ func (m *Manager) DestroyProject(ctx context.Context, projectID string) error {
 }
 
 func (m *Manager) streamEvents(projectID, sockPath string, runtime string) {
-	if runtime == "local" {
-		sockPath = "/run/forge/ctl.sock"
-	}
-
 	// Simple retry loop to connect to socket
 	client := http.Client{
 		Transport: &http.Transport{
@@ -245,9 +242,6 @@ func (m *Manager) HandleRPC(ctx context.Context) {
 			prompt := req["prompt"].(string)
 
 			sockPath := filepath.Join(m.config.WSRoot, projectID, "ctl", "ctl.sock")
-			if m.config.Runtime == "local" {
-				sockPath = "/run/forge/ctl.sock"
-			}
 			client := http.Client{
 				Transport: &http.Transport{
 					DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
