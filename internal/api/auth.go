@@ -142,7 +142,7 @@ func (h *AuthHandler) logout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   h.config.TLS == "on",
 		SameSite: http.SameSiteLaxMode,
 	})
 
