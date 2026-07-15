@@ -120,7 +120,8 @@ func (m *Manager) StartProject(ctx context.Context, req StartRequest) error {
 		if m.config.FakeLLM {
 			shimArgs = append(shimArgs, "--fake-agent")
 		}
-		cmd = exec.CommandContext(ctx, "bin/forge-shim-amd64", shimArgs...)
+		shimPath, _ := filepath.Abs("bin/forge-shim-amd64")
+		cmd = exec.CommandContext(ctx, shimPath, shimArgs...)
 		cmd.Env = append(os.Environ(), "FORGE_PROJECT_ID="+req.ProjectID)
 		cmd.Dir = workDir
 
